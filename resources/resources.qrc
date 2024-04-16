@@ -1,0 +1,12 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>image/background.png</file>
+        <file>image/block.jpg</file>
+        <file>image/title.png</file>
+        <file>image/level_background.jpg</file>
+    </qresource>
+    <qresource prefix="/audio">
+        <file>audio/BlockAudio.wav</file>
+        <file>audio/PureMusic.mp3</file>
+    </qresource>
+</RCC>
