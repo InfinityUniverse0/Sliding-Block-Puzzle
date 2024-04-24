@@ -448,10 +448,32 @@ void MainWindow::randomInit(bool levelChanged) {
     for(int i=0;i<N-1;i++)
         p[i]=i+1;
 
-    //序列随机排序
-    using std::random_shuffle;
-    std::srand(QTime::currentTime().msec()+QTime::currentTime().second()*1000);//使得每次均不同
-    random_shuffle(p, p + N - 1); //注意范围
+    // 序列随机排序
+    // using std::random_shuffle;
+    // std::srand(QTime::currentTime().msec()+QTime::currentTime().second()*1000);//使得每次均不同
+    // random_shuffle(p, p + N - 1); //注意范围
+
+    // 序列随机排序（测试中发现 random_device 不会提供非确定性的随机数）
+    // std::random_device rd;
+    // std::mt19937 g(rd());
+    // std::shuffle(p, p + N - 1, g); // 注意范围
+
+    int *tmp = nullptr;
+    do {
+        // 序列随机排序
+        std::mt19937 g(std::chrono::system_clock::now().time_since_epoch().count());
+        std::shuffle(p, p + N - 1, g); // 注意范围
+        
+        // Copy p to tmp
+        if (tmp)
+            delete[] tmp;
+        tmp = new int[N - 1];
+        for (int i = 0; i < N - 1; i++) {
+            tmp[i] = p[i];
+        }
+    } while ((mergeSortAndCountInversions(tmp, 0, N - 2) & 1) != 0); // 保证有解
+    if (tmp)
+        delete[] tmp;
 
     if (levelChanged) {
         if (Block)

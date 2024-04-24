@@ -15,13 +15,15 @@ INCLUDEPATH += include
 HEADERS += \
     include/coordinate.h \
     include/levelwindow.h \
-    include/mainwindow.h
+    include/mainwindow.h \
+    include/utils.h
 
 SOURCES += \
     main.cpp \
     src/coordinate.cpp \
     src/levelwindow.cpp \
-    src/mainwindow.cpp
+    src/mainwindow.cpp \
+    src/utils.cpp
 
 FORMS += \
     ui/mainwindow.ui

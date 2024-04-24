@@ -5,10 +5,8 @@
 
 //从此处开始
 #include <QPushButton>
-#include <cmath>
-#include <algorithm>
 #include <QtGlobal>
-#include <QTime>
+// #include <QTime>
 #include <QTimer>
 #include <QDateTime>
 #include <QMessageBox>
@@ -22,7 +20,12 @@
 
 #include "coordinate.h"
 #include "levelwindow.h"
+#include "utils.h"   // for mergeSortAndCountInversions (Used to determine whether the puzzle is solvable)
 
+#include <cmath>
+#include <algorithm> // for std::shuffle
+#include <chrono>    // for std::chrono::system_clock
+#include <random>    // for std::mt19937
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
