@@ -5,8 +5,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , N(16) // 默认滑块个数
-    , Block(nullptr) // 初始化为nullptr
     , Void(nullptr) // 初始化为nullptr
+    , Block(nullptr) // 初始化为nullptr
 {
     ui->setupUi(this);
 
