@@ -74,5 +74,7 @@ private:
     QPushButton *audioBtn1;//音效：开
     QPushButton *audioBtn0;//音效：关
 
+    // 随机初始化滑块矩阵
+    void randomInit(bool levelChanged = true);
 };
 #endif // MAINWINDOW_H

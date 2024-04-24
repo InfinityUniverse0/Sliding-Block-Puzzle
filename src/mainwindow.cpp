@@ -4,49 +4,14 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , N(16) // 默认滑块个数
+    , Block(nullptr) // 初始化为nullptr
+    , Void(nullptr) // 初始化为nullptr
 {
     ui->setupUi(this);
 
-    //从此处开始
-    N = 16;//滑块个数
-    //滑块规格参数
-    const int a=75;
-    const int b=100;
-    const int side=100;
-
-    //获取1 - N-1的随机数
-    int *p = new int[N-1]; //用于存储随机数
-    for(int i=0;i<N-1;i++)
-        p[i]=i+1;
-
-    //序列随机排序
-    using std::random_shuffle;
-    std::srand(QTime::currentTime().msec()+QTime::currentTime().second()*1000);//使得每次均不同
-    random_shuffle(p, p + N - 1); //注意范围
-
-    Block = new QPushButton[N];
-    for(int i=0;i<sqrt(N);i++){
-        for(int j=0;j<sqrt(N);j++){
-            Block[(int)(sqrt(N))*i+j].setParent(this);
-            Block[(int)(sqrt(N))*i+j].setGeometry(a+side*j,b+side*i,side,side);
-            connect(&Block[(int)(sqrt(N))*i+j],&QPushButton::clicked,this,[=](){
-                this->update(i,j);
-            });
-            Block[(int)(sqrt(N))*i+j].setFont(QFont("HGB8X_CNKI",18));
-            Block[(int)(sqrt(N)*i+j)].setStyleSheet("background-image: url(:/image/image/block.jpg);");
-            Block[(int)(sqrt(N))*i+j].setFocusPolicy(Qt::NoFocus);//NoFocus
-            if(!(i == sqrt(N)-1 && j == sqrt(N)-1))
-                Block[(int)(sqrt(N))*i+j].setText(QString::number(p[(int)(sqrt(N))*i+j]));
-        }
-    }
-
-    //回收
-    delete[] p;
-
-    //存储空滑块下标
-    Void = new Coordinate(sqrt(N));
-
-
+    // 随机初始化滑块矩阵
+    randomInit(true);
 
     //记步数
     step = new QLabel(this);
@@ -353,100 +318,13 @@ void MainWindow::restartGame(int X)
     step->setText("Steps:  "+QString::number(totalSteps));
     time->setText("Time:   "+QString::number(0));
 
-
-    if(X == 0){
-        //获取1 - N-1的随机数
-        int *p = new int[N-1]; //用于存储随机数
-        for(int i=0;i<N-1;i++)
-            p[i]=i+1;
-
-        //序列随机排序
-        using std::random_shuffle;
-        std::srand(QTime::currentTime().msec()+QTime::currentTime().second()*1000);//使得每次均不同
-        random_shuffle(p, p + N - 1); //注意范围
-
-        for(int i=0;i<sqrt(N);i++){
-            for(int j=0;j<sqrt(N);j++){
-                Block[(int)(sqrt(N))*i+j].setFocusPolicy(Qt::NoFocus);//NoFocus
-                if(!(i == sqrt(N)-1 && j == sqrt(N)-1))
-                    Block[(int)(sqrt(N))*i+j].setText(QString::number(p[(int)(sqrt(N))*i+j]));
-                else
-                    Block[(int)(sqrt(N))*i+j].setText("");
-            }
-        }
-
-        //回收
-        delete[] p;
-
-        //存储空滑块下标
-        Void->setIndex(sqrt(N)-1,sqrt(N)-1);
-
-        //结束函数
-        return;
-    }
-    else{
-        //滑块个数
-        N = X*X;
-        //滑块规格参数
-        int a;
-        int b;
-        int side;
-        switch(X){
-        case 3:
-            a = 100;
-            b = 100;
-            side = 125;
-            break;
-        case 4:
-            a = 75;
-            b = 100;
-            side = 100;
-            break;
-        case 5:
-            a = 30;
-            b = 50;
-            side = 100;
-            break;
-        }
-
-        //获取1 - N-1的随机数
-        int *p = new int[N-1]; //用于存储随机数
-        for(int i=0;i<N-1;i++)
-            p[i]=i+1;
-
-        //序列随机排序
-        using std::random_shuffle;
-        std::srand(QTime::currentTime().msec()+QTime::currentTime().second()*1000);//使得每次均不同
-        random_shuffle(p, p + N - 1); //注意范围
-
-        delete[] Block;//回收
-        Block = new QPushButton[N];
-        for(int i=0;i<sqrt(N);i++){
-            for(int j=0;j<sqrt(N);j++){
-                Block[(int)(sqrt(N))*i+j].setParent(this);
-                Block[(int)(sqrt(N))*i+j].setGeometry(a+side*j,b+side*i,side,side);
-                connect(&Block[(int)(sqrt(N))*i+j],&QPushButton::clicked,this,[=](){
-                    this->update(i,j);
-                });
-                Block[(int)(sqrt(N))*i+j].setFont(QFont("HGB8X_CNKI",18));
-                Block[(int)(sqrt(N)*i+j)].setStyleSheet("background-image: url(:/image/image/block.jpg);");
-                Block[(int)(sqrt(N))*i+j].setFocusPolicy(Qt::NoFocus);//NoFocus
-                if(!(i == sqrt(N)-1 && j == sqrt(N)-1))
-                    Block[(int)(sqrt(N))*i+j].setText(QString::number(p[(int)(sqrt(N))*i+j]));
-            }
-        }
-
-        //回收
-        delete[] p;
-
-        //存储空滑块下标
-        delete[] Void;//回收
-        Void = new Coordinate(sqrt(N));
-
-        //结束函数
-        return;
+    bool levelChanged = false; // 是否改变了难度
+    if (X != 0) { // 更新滑块个数
+        N = X * X;
+        levelChanged = true;
     }
 
+    randomInit(levelChanged); // 重新随机初始化
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -536,4 +414,84 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
     default:;
     }
+}
+
+void MainWindow::randomInit(bool levelChanged) {
+    //滑块规格参数
+    int n = (int)(sqrt(N)); // 滑块矩阵的行数或列数
+    int a, b, side;
+    switch (n) {
+    case 3:
+        a = 100;
+        b = 100;
+        side = 125;
+        break;
+    case 4:
+        a = 75;
+        b = 100;
+        side = 100;
+        break;
+    case 5:
+        a = 30;
+        b = 50;
+        side = 100;
+        break;
+    default:
+        a = 75;
+        b = 100;
+        side = 100;
+        break;
+    }
+
+    //获取1 - N-1的随机数
+    int *p = new int[N-1]; //用于存储随机数
+    for(int i=0;i<N-1;i++)
+        p[i]=i+1;
+
+    //序列随机排序
+    using std::random_shuffle;
+    std::srand(QTime::currentTime().msec()+QTime::currentTime().second()*1000);//使得每次均不同
+    random_shuffle(p, p + N - 1); //注意范围
+
+    if (levelChanged) {
+        if (Block)
+            delete[] Block;//回收
+        Block = new QPushButton[N];
+
+        for(int i=0;i<n;i++) {
+            for(int j=0;j<n;j++){
+                Block[n*i+j].setParent(this);
+                Block[n*i+j].setGeometry(a+side*j,b+side*i,side,side);
+                connect(&Block[n*i+j],&QPushButton::clicked,this,[=](){
+                    this->update(i,j);
+                });
+                Block[n*i+j].setFont(QFont("HGB8X_CNKI",18));
+                Block[n*i+j].setStyleSheet("background-image: url(:/image/image/block.jpg);");
+                Block[n*i+j].setFocusPolicy(Qt::NoFocus);//NoFocus
+                if(!(i == n-1 && j == n-1))
+                    Block[n*i+j].setText(QString::number(p[n*i+j]));
+            }
+        }
+
+        //存储空滑块下标
+        if (Void)
+            delete[] Void;//回收
+        Void = new Coordinate(n);
+    }
+    else {
+        for(int i=0;i<sqrt(N);i++){
+            for(int j=0;j<sqrt(N);j++){
+                Block[(int)(sqrt(N))*i+j].setFocusPolicy(Qt::NoFocus);//NoFocus
+                if(!(i == sqrt(N)-1 && j == sqrt(N)-1))
+                    Block[(int)(sqrt(N))*i+j].setText(QString::number(p[(int)(sqrt(N))*i+j]));
+                else
+                    Block[(int)(sqrt(N))*i+j].setText("");
+            }
+        }
+        //存储空滑块下标
+        Void->setIndex(sqrt(N)-1,sqrt(N)-1);
+    }
+
+    //回收
+    delete[] p;
 }
